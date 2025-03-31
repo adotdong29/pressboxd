@@ -1,4 +1,3 @@
-// pages/onboarding.js
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -6,20 +5,20 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Onboarding() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, loading } = useAuth(); // Now we also get loading state
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [profilePic, setProfilePic] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // Only check that user exists; do not check for profile completeness here.
+  // Wait until auth state has finished loading before checking user existence.
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [user, router]);
+  }, [loading, user, router]);
 
   const handleFileChange = (e) => {
     if (e.target.files?.length) {
@@ -29,10 +28,12 @@ export default function Onboarding() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+    setSubmitting(true);
+
+    // Double-check that we have a user after loading completes.
     if (!user) {
       setErrorMsg('No active session. Please log in again.');
-      setLoading(false);
+      setSubmitting(false);
       return;
     }
     const userId = user.id;
@@ -40,17 +41,15 @@ export default function Onboarding() {
     if (profilePic) {
       const fileExt = profilePic.name.split('.').pop();
       const fileName = `${userId}_${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase
-        .storage
+      const { error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, profilePic);
       if (uploadError) {
         setErrorMsg(`Image upload failed: ${uploadError.message}`);
-        setLoading(false);
+        setSubmitting(false);
         return;
       }
-      const { data: publicUrlData } = supabase
-        .storage
+      const { data: publicUrlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
       avatar_url = publicUrlData.publicUrl;
@@ -69,11 +68,13 @@ export default function Onboarding() {
       setErrorMsg(`Profile update failed: ${updateError.message}`);
     } else {
       setSuccessMsg('Profile updated successfully!');
-      // Once onboarding is complete, redirect to the main app page.
+      // Redirect to the main app after successful onboarding
       setTimeout(() => router.push('/app'), 2000);
     }
-    setLoading(false);
+    setSubmitting(false);
   };
+
+  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -115,9 +116,9 @@ export default function Onboarding() {
         <button 
           type="submit"
           className="bg-blue-500 text-white py-2 px-4 rounded w-full"
-          disabled={loading}
+          disabled={submitting}
         >
-          {loading ? 'Saving...' : 'Complete Onboarding'}
+          {submitting ? 'Saving...' : 'Complete Onboarding'}
         </button>
       </form>
     </div>

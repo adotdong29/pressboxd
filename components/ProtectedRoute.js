@@ -8,25 +8,21 @@ export default function ProtectedRoute({ children }) {
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return; // Don't redirect until we've loaded auth state
+    if (loading) return; // Wait for loading to finish
 
-    // If on the onboarding page, allow access regardless of profile completeness
-    if (router.pathname === "/onboarding") return;
-
+    // If no user, redirect to login
     if (!user) {
       router.push('/login');
-    } else if (!profile?.username) {
-      // If profile is incomplete and the user is not on onboarding, send them there.
+    } 
+    // If user is logged in but profile is incomplete, redirect to onboarding
+    else if (!profile?.username) {
       router.push('/onboarding');
     }
   }, [user, profile, loading, router]);
 
   if (loading) return <div>Loading...</div>;
 
-  // Allow onboarding page even if profile is incomplete
-  if (router.pathname === "/onboarding") return children;
-
-  // If user is not logged in or profile is incomplete, render a temporary message.
+  // If user is not logged in or profile incomplete, show a temporary message
   if (!user || !profile?.username) {
     return <div>Redirecting...</div>;
   }

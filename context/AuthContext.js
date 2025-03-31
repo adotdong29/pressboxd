@@ -9,20 +9,29 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Function to fetch profile for a given user
   const fetchProfile = async (user) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-    if (!error) return data;
-    return null;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      return data;
+    } catch (err) {
+      console.error("Fetch profile exception:", err);
+      return null;
+    }
   };
 
   useEffect(() => {
     const getSession = async () => {
+      // Log the initial session retrieval
       const { data: { session } } = await supabase.auth.getSession();
+      console.log("getSession returned:", session);
       if (session) {
         setUser(session.user);
         const prof = await fetchProfile(session.user);
@@ -33,7 +42,9 @@ export function AuthProvider({ children }) {
 
     getSession();
 
+    // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change event:", event, session);
       if (session) {
         setUser(session.user);
         const prof = await fetchProfile(session.user);
@@ -50,6 +61,7 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  console.log("AuthContext state:", { user, profile, loading });
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>
       {children}
