@@ -1,3 +1,4 @@
+// pages/onboarding.js
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -5,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Onboarding() {
   const router = useRouter();
-  const { user, loading } = useAuth(); // Now we also get loading state
+  const { user, loading } = useAuth();
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [profilePic, setProfilePic] = useState(null);
@@ -13,12 +14,12 @@ export default function Onboarding() {
   const [successMsg, setSuccessMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Wait until auth state has finished loading before checking user existence.
   useEffect(() => {
     if (!loading && !user) {
+      console.log("No user in onboarding. Redirecting to /login");
       router.push('/login');
     }
-  }, [loading, user, router]);
+  }, [user, loading, router]);
 
   const handleFileChange = (e) => {
     if (e.target.files?.length) {
@@ -29,8 +30,6 @@ export default function Onboarding() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-
-    // Double-check that we have a user after loading completes.
     if (!user) {
       setErrorMsg('No active session. Please log in again.');
       setSubmitting(false);
@@ -68,7 +67,6 @@ export default function Onboarding() {
       setErrorMsg(`Profile update failed: ${updateError.message}`);
     } else {
       setSuccessMsg('Profile updated successfully!');
-      // Redirect to the main app after successful onboarding
       setTimeout(() => router.push('/app'), 2000);
     }
     setSubmitting(false);

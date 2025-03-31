@@ -6,17 +6,20 @@ import ProtectedRoute from '../components/ProtectedRoute';
 
 function MyApp({ Component, pageProps }) {
   const router = useRouter();
+  // List all routes that should be public
   const publicRoutes = ['/', '/login', '/signup', '/onboarding'];
-  const isProtectedRoute = !publicRoutes.includes(router.pathname);
+  const isPublicRoute = publicRoutes.some((route) =>
+    router.pathname.startsWith(route)
+  );
 
   return (
     <AuthProvider>
-      {isProtectedRoute ? (
+      {isPublicRoute ? (
+        <Component {...pageProps} />
+      ) : (
         <ProtectedRoute>
           <Component {...pageProps} />
         </ProtectedRoute>
-      ) : (
-        <Component {...pageProps} />
       )}
     </AuthProvider>
   );

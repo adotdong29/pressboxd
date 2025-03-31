@@ -1,4 +1,3 @@
-// context/AuthContext.js
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -20,45 +19,37 @@ export function AuthProvider({ children }) {
         console.error("Error fetching profile:", error);
         return null;
       }
+      console.log("Fetched profile:", data);
       return data;
     } catch (err) {
-      console.error("Fetch profile exception:", err);
+      console.error("Exception in fetchProfile:", err);
       return null;
     }
   };
 
   useEffect(() => {
-    const getSession = async () => {
-      // Log the initial session retrieval
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log("getSession returned:", session);
-      if (session) {
-        setUser(session.user);
-        const prof = await fetchProfile(session.user);
-        setProfile(prof);
+    (async () => {
+      try {
+        console.log("Calling supabase.auth.getSession()...");
+        const { data: { session }, error } = await supabase.auth.getSession().catch(err => {
+          console.error("getSession catch:", err);
+          return { data: { session: null } };
+        });
+        console.log("getSession returned:", session, "Error:", error);
+        if (session) {
+          setUser(session.user);
+          const prof = await fetchProfile(session.user);
+          setProfile(prof);
+        } else {
+          console.log("No session found");
+        }
+      } catch (err) {
+        console.error("Error in getSession block:", err);
+      } finally {
+        setLoading(false);
+        console.log("Finished getSession; loading is now false");
       }
-      setLoading(false);
-    };
-
-    getSession();
-
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state change event:", event, session);
-      if (session) {
-        setUser(session.user);
-        const prof = await fetchProfile(session.user);
-        setProfile(prof);
-      } else {
-        setUser(null);
-        setProfile(null);
-      }
-      setLoading(false);
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
+    })();
   }, []);
 
   console.log("AuthContext state:", { user, profile, loading });
