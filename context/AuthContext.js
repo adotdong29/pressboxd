@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Helper function to fetch the profile for a given user.
   const fetchProfile = async (user) => {
     try {
       const { data, error } = await supabase
@@ -16,10 +17,9 @@ export function AuthProvider({ children }) {
         .eq('id', user.id)
         .single();
       if (error) {
-        console.error("Error fetching profile:", error);
+        console.warn("Profile not found (new user?) or error:", error.message);
         return null;
       }
-      console.log("Fetched profile:", data);
       return data;
     } catch (err) {
       console.error("Exception in fetchProfile:", err);
@@ -28,31 +28,48 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
-    (async () => {
+    // Initial session fetch
+    const getSession = async () => {
       try {
-        console.log("Calling supabase.auth.getSession()...");
-        const { data: { session }, error } = await supabase.auth.getSession().catch(err => {
-          console.error("getSession catch:", err);
-          return { data: { session: null } };
-        });
-        console.log("getSession returned:", session, "Error:", error);
+        const { data: { session }, error } = await supabase.auth.getSession();
         if (session) {
           setUser(session.user);
           const prof = await fetchProfile(session.user);
           setProfile(prof);
-        } else {
-          console.log("No session found");
         }
       } catch (err) {
-        console.error("Error in getSession block:", err);
+        console.error("Error in getSession:", err);
       } finally {
         setLoading(false);
-        console.log("Finished getSession; loading is now false");
+        console.log("Finished initial getSession; loading is now false");
       }
-    })();
+    };
+
+    getSession();
+
+    // Listen for auth state changes (e.g. login or logout)
+    const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change event:", event, session);
+      if (session) {
+        setUser(session.user);
+        const prof = await fetchProfile(session.user);
+        setProfile(prof);
+      } else {
+        setUser(null);
+        setProfile(null);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      listener?.subscription.unsubscribe();
+    };
   }, []);
 
-  console.log("AuthContext state:", { user, profile, loading });
+  useEffect(() => {
+    console.log("AuthContext updated:", { user, profile, loading });
+  }, [user, profile, loading]);
+
   return (
     <AuthContext.Provider value={{ user, profile, loading }}>
       {children}

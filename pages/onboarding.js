@@ -1,4 +1,3 @@
-// pages/onboarding.js
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
@@ -6,7 +5,11 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Onboarding() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  // Get session data from AuthContext
+  const { user: contextUser, loading: contextLoading } = useAuth();
+  // Also maintain a local user state that we explicitly re-fetch
+  const [localUser, setLocalUser] = useState(null);
+  
   const [username, setUsername] = useState('');
   const [bio, setBio] = useState('');
   const [profilePic, setProfilePic] = useState(null);
@@ -14,12 +17,44 @@ export default function Onboarding() {
   const [successMsg, setSuccessMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Re-fetch session directly on mount
   useEffect(() => {
-    if (!loading && !user) {
-      console.log("No user in onboarding. Redirecting to /login");
-      router.push('/login');
-    }
-  }, [user, loading, router]);
+    const fetchSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error fetching session in Onboarding:", error);
+        } else {
+          console.log("Onboarding: direct getSession returned:", session);
+          setLocalUser(session?.user || null);
+        }
+      } catch (err) {
+        console.error("Onboarding: exception in getSession:", err);
+      }
+    };
+    fetchSession();
+  }, []);
+
+  // Log states for debugging
+  useEffect(() => {
+    console.log("Onboarding page state:", {
+      contextUser,
+      localUser,
+      contextLoading,
+    });
+  }, [contextUser, localUser, contextLoading]);
+
+  // Use the local session if available; fallback to context
+  const currentUser = localUser || contextUser;
+
+  // If still loading (from context) and we haven't yet re-fetched the session, show loading.
+  if (contextLoading && !currentUser) return <div>Loading...</div>;
+
+  // If no session is found, redirect to login.
+  if (!currentUser) {
+    router.push('/login');
+    return <div>Redirecting to login...</div>;
+  }
 
   const handleFileChange = (e) => {
     if (e.target.files?.length) {
@@ -30,12 +65,20 @@ export default function Onboarding() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
-    if (!user) {
+
+    // Re-check session if necessary.
+    let sessionUser = currentUser;
+    if (!sessionUser) {
+      const { data: { session } } = await supabase.auth.getSession();
+      sessionUser = session?.user;
+    }
+    if (!sessionUser) {
       setErrorMsg('No active session. Please log in again.');
       setSubmitting(false);
       return;
     }
-    const userId = user.id;
+
+    const userId = sessionUser.id;
     let avatar_url = null;
     if (profilePic) {
       const fileExt = profilePic.name.split('.').pop();
@@ -53,6 +96,7 @@ export default function Onboarding() {
         .getPublicUrl(fileName);
       avatar_url = publicUrlData.publicUrl;
     }
+
     const updates = {
       id: userId,
       username,
@@ -60,6 +104,7 @@ export default function Onboarding() {
       avatar_url,
       updated_at: new Date(),
     };
+
     const { error: updateError } = await supabase
       .from('profiles')
       .upsert(updates, { returning: 'minimal' });
@@ -71,8 +116,6 @@ export default function Onboarding() {
     }
     setSubmitting(false);
   };
-
-  if (loading) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
