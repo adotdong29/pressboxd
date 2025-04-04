@@ -5,9 +5,7 @@ import { useAuth } from '../context/AuthContext';
 
 export default function Onboarding() {
   const router = useRouter();
-  // Get session data from AuthContext
   const { user: contextUser, loading: contextLoading } = useAuth();
-  // Also maintain a local user state that we explicitly re-fetch
   const [localUser, setLocalUser] = useState(null);
   
   const [username, setUsername] = useState('');
@@ -16,6 +14,7 @@ export default function Onboarding() {
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
 
   // Re-fetch session directly on mount
   useEffect(() => {
@@ -23,36 +22,48 @@ export default function Onboarding() {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error) {
-          console.error("Error fetching session in Onboarding:", error);
+          console.error('Error fetching session in Onboarding:', error);
         } else {
-          console.log("Onboarding: direct getSession returned:", session);
+          console.log('Onboarding: direct getSession returned:', session);
           setLocalUser(session?.user || null);
         }
       } catch (err) {
-        console.error("Onboarding: exception in getSession:", err);
+        console.error('Onboarding: exception in getSession:', err);
       }
     };
     fetchSession();
   }, []);
 
-  // Log states for debugging
-  useEffect(() => {
-    console.log("Onboarding page state:", {
-      contextUser,
-      localUser,
-      contextLoading,
-    });
-  }, [contextUser, localUser, contextLoading]);
-
-  // Use the local session if available; fallback to context
   const currentUser = localUser || contextUser;
 
-  // If still loading (from context) and we haven't yet re-fetched the session, show loading.
-  if (contextLoading && !currentUser) return <div>Loading...</div>;
+  // Immediately check if onboarding is complete and redirect if so.
+  useEffect(() => {
+    async function checkOnboarding() {
+      if (currentUser) {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', currentUser.id)
+          .single();
+        if (error) {
+          console.error('Error checking onboarding status:', error);
+        } else if (data && data.username) {
+          // Onboarding complete—redirect without showing the form
+          router.replace('/app');
+          return;
+        }
+      }
+      setCheckingOnboarding(false);
+    }
+    checkOnboarding();
+  }, [currentUser, router]);
+
+  // Show loading state until onboarding check completes.
+  if (contextLoading || checkingOnboarding) return <div>Loading...</div>;
 
   // If no session is found, redirect to login.
   if (!currentUser) {
-    router.push('/login');
+    router.replace('/login');
     return <div>Redirecting to login...</div>;
   }
 
@@ -66,7 +77,6 @@ export default function Onboarding() {
     e.preventDefault();
     setSubmitting(true);
 
-    // Re-check session if necessary.
     let sessionUser = currentUser;
     if (!sessionUser) {
       const { data: { session } } = await supabase.auth.getSession();
@@ -103,6 +113,8 @@ export default function Onboarding() {
       bio,
       avatar_url,
       updated_at: new Date(),
+      // If you have an onboarding flag, you could add it here:
+      // onboarding_complete: true,
     };
 
     const { error: updateError } = await supabase

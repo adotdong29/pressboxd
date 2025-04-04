@@ -1,40 +1,62 @@
 // pages/signup.js
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
-import Link from 'next/link';
 
-export default function SignUp() {
+export default function Signup() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
+  const [error, setError] = useState(null);
 
-  const handleSignUp = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signUp(
-      { email, password },
-      { redirectTo: `${window.location.origin}/auth/callback` }
-    );
+    const { error } = await supabase.auth.signUp({ email, password });
     if (error) {
-      setErrorMsg(error.message);
+      setError(error.message);
     } else {
-      setSuccessMsg('Check your email for a confirmation link!');
+      router.push('/login');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <form onSubmit={handleSignUp} className="bg-white p-8 rounded shadow-md w-full max-w-md">
-        <h1 className="text-2xl mb-4">Sign Up for Pressboxd</h1>
-        {errorMsg && <p className="text-red-500 mb-2">{errorMsg}</p>}
-        {successMsg && <p className="text-green-500 mb-2">{successMsg}</p>}
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="border p-2 mb-4 w-full" required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="border p-2 mb-4 w-full" required />
-        <button type="submit" className="bg-green-500 text-white py-2 px-4 rounded w-full">Sign Up</button>
-        <p className="mt-4 text-sm">
-          Already have an account? <Link href="/login" className="text-blue-500">Login</Link>
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center text-gray-100">
+      <div className="w-full max-w-md p-8 bg-gray-800 rounded shadow">
+        <h1 className="text-3xl font-bold mb-6 text-yellow-500 text-center">
+          Sign Up
+        </h1>
+        {error && <p className="mb-4 text-red-500">{error}</p>}
+        <form onSubmit={handleSignup}>
+          <label className="block mb-2">Email</label>
+          <input
+            type="email"
+            className="w-full p-2 mb-4 bg-gray-700 text-gray-100 rounded"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <label className="block mb-2">Password</label>
+          <input
+            type="password"
+            className="w-full p-2 mb-4 bg-gray-700 text-gray-100 rounded"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button
+            type="submit"
+            className="w-full py-2 px-4 bg-yellow-500 text-gray-900 font-bold rounded hover:bg-yellow-400"
+          >
+            Sign Up
+          </button>
+        </form>
+        <p className="mt-4 text-center">
+          Already have an account?{' '}
+          <a href="/login" className="text-yellow-500 hover:underline">
+            Login
+          </a>
         </p>
-      </form>
+      </div>
     </div>
   );
 }
