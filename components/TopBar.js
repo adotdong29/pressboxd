@@ -9,6 +9,7 @@ export default function TopBar() {
   const { user } = useAuth();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -39,30 +40,36 @@ export default function TopBar() {
         <Link href="/friends" className="text-gray-100 hover:text-yellow-500 transition transform hover:scale-105">
           Friends
         </Link>
-        <div className="relative inline-block">
-          <button className="text-gray-100 hover:text-yellow-500 focus:outline-none peer transition transform hover:scale-105">
+        <div 
+          className="relative inline-block"
+          onMouseEnter={() => setDropdownVisible(true)}
+          onMouseLeave={() => setDropdownVisible(false)}
+        >
+          <button className="text-gray-100 hover:text-yellow-500 focus:outline-none transition transform hover:scale-105">
             Sports
           </button>
-          <div className="absolute left-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded hidden peer-hover:block transition-opacity duration-300">
-            {[
-              'soccer',
-              'cricket',
-              'hockey',
-              'tennis',
-              'volleyball',
-              'table-tennis',
-              'basketball',
-              'baseball',
-              'rugby',
-              'golf',
-            ].map((sport) => (
-              <Link key={sport} href={`/sports/${sport}`}>
-                <span className="block px-4 py-2 hover:bg-gray-700 cursor-pointer capitalize transition transform hover:scale-105">
-                  {sport}
-                </span>
-              </Link>
-            ))}
-          </div>
+          {dropdownVisible && (
+            <div className="absolute left-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded transition-opacity duration-300">
+              {[
+                'soccer',
+                'cricket',
+                'hockey',
+                'tennis',
+                'volleyball',
+                'table-tennis',
+                'basketball',
+                'baseball',
+                'rugby',
+                'golf',
+              ].map((sport) => (
+                <Link key={sport} href={`/sports/${sport}`}>
+                  <span className="block px-4 py-2 hover:bg-gray-700 cursor-pointer capitalize transition transform hover:scale-105">
+                    {sport}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <div className="flex items-center space-x-4">

@@ -88,7 +88,7 @@ export default function ForumThread({ category, post, comments }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 animate-fadeIn">
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold mb-4 text-yellow-500">{post.title}</h1>
         <p className="mb-4">{post.content}</p>
@@ -96,10 +96,10 @@ export default function ForumThread({ category, post, comments }) {
           <img src={post.image_url} alt={post.title} className="mb-4 rounded" />
         )}
         <div className="flex items-center space-x-4 mb-4">
-          <button onClick={handleLike} className="text-yellow-500 hover:underline">
+          <button onClick={handleLike} className="text-yellow-500 hover:underline transition transform hover:scale-105">
             Like ({likes})
           </button>
-          <button onClick={handleDislike} className="text-yellow-500 hover:underline">
+          <button onClick={handleDislike} className="text-yellow-500 hover:underline transition transform hover:scale-105">
             Dislike ({dislikes})
           </button>
         </div>
@@ -116,19 +116,19 @@ export default function ForumThread({ category, post, comments }) {
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
             className="w-full p-2 bg-gray-700 text-gray-100 rounded mb-2"
-            placeholder="Write a comment..."
+            placeholder="Write your comment here..."
             required
           ></textarea>
           <button
             type="submit"
-            className="py-2 px-4 bg-yellow-500 text-gray-900 font-bold rounded hover:bg-yellow-400"
+            className="py-2 px-4 bg-yellow-500 text-gray-900 font-bold rounded hover:bg-yellow-400 transition transform hover:scale-105"
             disabled={loading}
           >
             {loading ? 'Submitting...' : 'Submit Comment'}
           </button>
         </form>
         <div className="mt-4">
-          <Link href={`/forum/${category}`} className="text-yellow-500 hover:underline">
+          <Link href={`/forum/${category}`} className="text-yellow-500 hover:underline transition transform hover:scale-105">
             &larr; Back to {category} forum
           </Link>
         </div>

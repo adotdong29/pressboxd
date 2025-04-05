@@ -4,11 +4,8 @@
   "/_document": "pages/_document.js",
   "/": "pages/index.js",
   "/login": "pages/login.js",
-  "/signup": "pages/signup.js",
-  "/search": "pages/search.js",
-  "/profile": "pages/profile.js",
+  "/forum/[category]/[postId]": "pages/forum/[category]/[postId].js",
   "/forum": "pages/forum.js",
-  "/forum/create": "pages/forum/create.js",
-  "/friends/add": "pages/friends/add.js",
-  "/friends": "pages/friends.js"
+  "/sports/[sport]": "pages/sports/[sport].js",
+  "/forum/create": "pages/forum/create.js"
 }

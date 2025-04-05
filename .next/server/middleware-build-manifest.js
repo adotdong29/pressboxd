@@ -30,40 +30,25 @@ globalThis.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/forum.js"
     ],
+    "/forum/[category]/[postId]": [
+      "static/chunks/webpack.js",
+      "static/chunks/main.js",
+      "static/chunks/pages/forum/[category]/[postId].js"
+    ],
     "/forum/create": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/forum/create.js"
-    ],
-    "/friends": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/friends.js"
-    ],
-    "/friends/add": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/friends/add.js"
     ],
     "/login": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/login.js"
     ],
-    "/profile": [
+    "/sports/[sport]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/profile.js"
-    ],
-    "/search": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/search.js"
-    ],
-    "/signup": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/signup.js"
+      "static/chunks/pages/sports/[sport].js"
     ]
   },
   "ampFirstPages": []
