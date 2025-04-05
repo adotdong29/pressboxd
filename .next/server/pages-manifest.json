@@ -1,1 +1,14 @@
-{}
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/login": "pages/login.js",
+  "/signup": "pages/signup.js",
+  "/search": "pages/search.js",
+  "/profile": "pages/profile.js",
+  "/forum": "pages/forum.js",
+  "/forum/create": "pages/forum/create.js",
+  "/friends/add": "pages/friends/add.js",
+  "/friends": "pages/friends.js"
+}

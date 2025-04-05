@@ -1,26 +1,32 @@
 // pages/_app.js
 import '../styles/globals.css';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider, useAuth } from '../context/AuthContext';
+import TopBar from '../components/TopBar';
 import { useRouter } from 'next/router';
 import ProtectedRoute from '../components/ProtectedRoute';
 
-function MyApp({ Component, pageProps }) {
+function AppContent({ Component, pageProps }) {
   const router = useRouter();
-  // Only allow public routes for login and signup; all others are protected.
-  const publicRoutes = ['/login', '/signup'];
-  const isPublicRoute = publicRoutes.includes(router.pathname);
+  const { user } = useAuth();
+
+  // Hide TopBar on login, signup, or the welcome page ("/") when not logged in.
+  const hideTopBar =
+    router.pathname === '/login' ||
+    router.pathname === '/signup' ||
+    (router.pathname === '/' && !user);
 
   return (
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      {!hideTopBar && <TopBar />}
+      <Component {...pageProps} />
+    </div>
+  );
+}
+
+function MyApp({ Component, pageProps }) {
+  return (
     <AuthProvider>
-      <div className="min-h-screen dark bg-gray-900 text-gray-100">
-        {isPublicRoute ? (
-          <Component {...pageProps} />
-        ) : (
-          <ProtectedRoute>
-            <Component {...pageProps} />
-          </ProtectedRoute>
-        )}
-      </div>
+      <AppContent Component={Component} pageProps={pageProps} />
     </AuthProvider>
   );
 }

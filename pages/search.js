@@ -1,41 +1,75 @@
 // pages/search.js
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabaseClient';
-import GameCard from '../components/GameCard';
+import Link from 'next/link';
 
-export default function Search() {
-  const [query, setQuery] = useState('');
-  const [games, setGames] = useState([]);
+export default function SearchPage() {
+  const router = useRouter();
+  const { q } = router.query;
+  const [userResults, setUserResults] = useState([]);
+  const [gameResults, setGameResults] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function searchGames() {
-      if (!query) {
-        setGames([]);
-        return;
-      }
-      const { data, error } = await supabase
+    if (!q) return;
+    async function search() {
+      setLoading(true);
+      // Search users in profiles table
+      const { data: users, error: userError } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('username', `%${q}%`);
+      if (userError) console.error('Error searching users:', userError);
+      else setUserResults(users);
+
+      // Search games in games table (if exists)
+      const { data: games, error: gameError } = await supabase
         .from('games')
         .select('*')
-        .ilike('title', `%${query}%`);
-      if (!error) setGames(data);
+        .ilike('title', `%${q}%`);
+      if (gameError) console.error('Error searching games:', gameError);
+      else setGameResults(games);
+
+      setLoading(false);
     }
-    searchGames();
-  }, [query]);
+    search();
+  }, [q]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Search Games</h1>
-      <input
-        type="text"
-        placeholder="Type to search..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        className="w-full p-2 border rounded mb-4"
-      />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {games.map((game) => (
-          <GameCard key={game.id} game={game} />
-        ))}
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+      <div className="container mx-auto">
+        <h1 className="text-3xl font-bold mb-4 text-yellow-500">Search Results</h1>
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <>
+            <section className="mb-8">
+              <h2 className="text-2xl font-bold mb-2 text-yellow-500">Users</h2>
+              {userResults.length > 0 ? (
+                userResults.map((user) => (
+                  <div key={user.id} className="bg-gray-800 p-4 rounded shadow mb-2">
+                    <p>{user.username}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No users found.</p>
+              )}
+            </section>
+            <section>
+              <h2 className="text-2xl font-bold mb-2 text-yellow-500">Games</h2>
+              {gameResults.length > 0 ? (
+                gameResults.map((game) => (
+                  <div key={game.id} className="bg-gray-800 p-4 rounded shadow mb-2">
+                    <p>{game.title}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No games found.</p>
+              )}
+            </section>
+          </>
+        )}
       </div>
     </div>
   );

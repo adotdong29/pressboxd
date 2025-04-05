@@ -1,63 +1,44 @@
 // pages/friends.js
 import { useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import Link from 'next/link';
 
-export default function Friends() {
+export default function FriendsPage() {
+  const { user } = useAuth();
   const [friends, setFriends] = useState([]);
-  const [friendRequests, setFriendRequests] = useState([]);
-  const [message, setMessage] = useState('');
 
   useEffect(() => {
-    async function fetchFriends() {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) return;
-      // Fetch friends for current user (assuming a "friends" table with user_id and friend_id)
-      const { data: friendsData, error } = await supabase
-        .from('friends')
-        .select('*')
-        .eq('user_id', user.id);
-      if (!error) setFriends(friendsData);
-
-      // Fetch friend requests (assuming a "friend_requests" table with status "pending")
-      const { data: requestsData, error: reqError } = await supabase
-        .from('friend_requests')
-        .select('*')
-        .eq('receiver_id', user.id)
-        .eq('status', 'pending');
-      if (!reqError) setFriendRequests(requestsData);
+    if (user) {
+      async function fetchFriends() {
+        const { data, error } = await supabase
+          .from('friends')
+          .select('friend_id, profiles(username)')
+          .eq('user_id', user.id);
+        if (error) console.error('Error fetching friends:', error);
+        else setFriends(data);
+      }
+      fetchFriends();
     }
-    fetchFriends();
-  }, []);
-
-  const handleAccept = async (requestId) => {
-    // Update friend request status and add to friends table
-    const { error } = await supabase
-      .from('friend_requests')
-      .update({ status: 'accepted' })
-      .eq('id', requestId);
-    if (error) setMessage(error.message);
-    else setMessage('Friend request accepted!');
-  };
+  }, [user]);
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-4">Friends</h1>
-      {message && <p>{message}</p>}
-      <h2 className="text-xl font-bold mt-4">Friend Requests</h2>
-      {friendRequests.length === 0 && <p>No pending requests.</p>}
-      {friendRequests.map((req) => (
-        <div key={req.id} className="border p-2 rounded mb-2 flex justify-between">
-          <span>Request from: {req.sender_id}</span>
-          <button onClick={() => handleAccept(req.id)} className="bg-green-500 text-white px-2 rounded">Accept</button>
-        </div>
-      ))}
-      <h2 className="text-xl font-bold mt-4">Your Friends</h2>
-      {friends.length === 0 && <p>You have no friends yet.</p>}
-      {friends.map((friend) => (
-        <div key={friend.friend_id} className="border p-2 rounded mb-2">
-          Friend ID: {friend.friend_id}
-        </div>
-      ))}
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+      <div className="container mx-auto">
+        <h1 className="text-3xl font-bold mb-4 text-yellow-500">Friends</h1>
+        {friends.length > 0 ? (
+          friends.map((friend) => (
+            <div key={friend.friend_id} className="bg-gray-800 p-4 rounded shadow mb-2">
+              <p>{friend.profiles?.username || 'Unknown'}</p>
+            </div>
+          ))
+        ) : (
+          <p>You have no friends yet.</p>
+        )}
+        <Link href="/friends/add" className="text-yellow-500 hover:underline">
+          Find and add friends
+        </Link>
+      </div>
     </div>
   );
 }

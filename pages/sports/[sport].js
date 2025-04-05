@@ -1,54 +1,85 @@
 // pages/sports/[sport].js
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { supabase } from '../../lib/supabaseClient';
-import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+const sportsMapping = {
+  soccer: { leagueId: '4328', sportName: 'Soccer' },
+  cricket: { leagueId: '4391', sportName: 'Cricket' },
+  hockey: { leagueId: '4334', sportName: 'Hockey' },
+  tennis: { leagueId: '4464', sportName: 'Tennis' },
+  volleyball: { leagueId: '4466', sportName: 'Volleyball' },
+  'table-tennis': { leagueId: '4468', sportName: 'Table Tennis' },
+  basketball: { leagueId: '4387', sportName: 'Basketball' },
+  baseball: { leagueId: '4424', sportName: 'Baseball' },
+  rugby: { leagueId: '4388', sportName: 'Rugby' },
+  golf: { leagueId: '4469', sportName: 'Golf' },
+};
 
 export default function SportPage() {
   const router = useRouter();
   const { sport } = router.query;
-  const [posts, setPosts] = useState([]);
+  const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (!sport) return;
-    async function fetchPosts() {
-      const { data, error } = await supabase
-        .from('forum_posts')
-        .select('*')
-        .eq('sport', sport)
-        .order('created_at', { ascending: false });
-      if (error) {
-        console.error('Error fetching forum posts:', error);
-      } else {
-        setPosts(data);
+    async function fetchGames() {
+      const mapping = sportsMapping[sport];
+      if (!mapping) {
+        setError('Sport not recognized.');
+        setLoading(false);
+        return;
       }
-      setLoading(false);
+      const url = `https://www.thesportsdb.com/api/v1/json/1/eventsnextleague.php?id=${mapping.leagueId}`;
+      try {
+        const res = await fetch(url);
+        if (res.status === 404) {
+          setGames([]);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+        if (!res.ok) {
+          const text = await res.text();
+          setError(`Error fetching games: HTTP ${res.status}`);
+          setGames([]);
+          setLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setGames(data.events || []);
+      } catch (err) {
+        setError('Error fetching games.');
+        setGames([]);
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchPosts();
+    fetchGames();
   }, [sport]);
 
   if (loading)
-    return <div className="p-4">Loading forum posts for {sport}...</div>;
+    return <div className="p-4">Loading games for {sport}...</div>;
+  if (error) return <div className="p-4 text-red-500">{error}</div>;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4">
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 animate-fadeIn">
       <div className="container mx-auto">
         <h1 className="text-3xl font-bold mb-4 text-yellow-500">
-          {sport.charAt(0).toUpperCase() + sport.slice(1)} Forum
+          {sportsMapping[sport].sportName} Games
         </h1>
-        {posts.length > 0 ? (
-          posts.map((post) => (
-            <div key={post.id} className="bg-gray-800 p-4 rounded shadow mb-4">
-              <h2 className="text-xl font-semibold">{post.title}</h2>
-              <p>{post.content}</p>
-              <Link href={`/forums/${sport}/${post.id}`}>
-                <a className="text-yellow-500 hover:underline">View Discussion</a>
-              </Link>
-            </div>
-          ))
+        {games.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {games.map((game) => (
+              <div key={game.idEvent} className="bg-gray-800 p-4 rounded shadow transition transform hover:scale-105">
+                <h2 className="text-xl font-bold text-yellow-500">{game.strEvent}</h2>
+                <p>{game.dateEvent} at {game.strTime}</p>
+              </div>
+            ))}
+          </div>
         ) : (
-          <p>No posts available for {sport} yet.</p>
+          <p>No upcoming games available for {sport}.</p>
         )}
       </div>
     </div>

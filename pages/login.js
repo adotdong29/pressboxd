@@ -1,6 +1,7 @@
 // pages/login.js
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { supabase } from '../lib/supabaseClient';
 
 export default function Login() {
@@ -11,20 +12,19 @@ export default function Login() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const { error } = await supabase.auth.signIn({ email, password });
+    // Use signInWithPassword for Supabase v2
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setError(error.message);
     } else {
-      router.push('/');
+      router.push('/'); // Redirect to dashboard after login
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center text-gray-100">
       <div className="w-full max-w-md p-8 bg-gray-800 rounded shadow">
-        <h1 className="text-3xl font-bold mb-6 text-yellow-500 text-center">
-          Login
-        </h1>
+        <h1 className="text-3xl font-bold mb-6 text-yellow-500 text-center">Login</h1>
         {error && <p className="mb-4 text-red-500">{error}</p>}
         <form onSubmit={handleLogin}>
           <label className="block mb-2">Email</label>
@@ -52,9 +52,9 @@ export default function Login() {
         </form>
         <p className="mt-4 text-center">
           Don't have an account?{' '}
-          <a href="/signup" className="text-yellow-500 hover:underline">
+          <Link href="/signup" className="text-yellow-500 hover:underline">
             Sign Up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
