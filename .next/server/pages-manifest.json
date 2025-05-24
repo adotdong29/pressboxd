@@ -1,11 +1,22 @@
 {
   "/_app": "pages/_app.js",
+  "/app": "pages/app.js",
+  "/auth/callback": "pages/auth/callback.js",
   "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/": "pages/index.js",
+  "/forum/create": "pages/forum/create.js",
+  "/friends": "pages/friends.js",
   "/login": "pages/login.js",
-  "/forum/[category]/[postId]": "pages/forum/[category]/[postId].js",
+  "/": "pages/index.js",
+  "/onboarding": "pages/onboarding.js",
+  "/profile": "pages/profile.js",
+  "/search": "pages/search.js",
+  "/friends/add": "pages/friends/add.js",
   "/forum": "pages/forum.js",
+  "/signup": "pages/signup.js",
+  "/test": "pages/test.js",
+  "/game/[id]": "pages/game/[id].js",
   "/sports/[sport]": "pages/sports/[sport].js",
-  "/forum/create": "pages/forum/create.js"
+  "/forum/[category]": "pages/forum/[category].js",
+  "/forum/[category]/[postId]": "pages/forum/[category]/[postId].js",
+  "/_document": "pages/_document.js"
 }

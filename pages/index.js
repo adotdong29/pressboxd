@@ -12,16 +12,13 @@ export default function IndexPage() {
 
   if (loading) return <div className="p-4">Loading...</div>;
 
-  // Welcome page for non-authenticated users.
+  // Welcome page for non-authenticated users, including the Pressboxd logo.
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center animate-fadeIn">
-        <h1 className="text-5xl font-bold mb-4 text-yellow-500">
-          Welcome to Pressboxd
-        </h1>
-        <p className="text-xl mb-8">
-          Rate and review sports games like never before.
-        </p>
+        <img src="/logo.png" alt="Pressboxd Logo" className="mb-4 w-48" />
+        <h1 className="text-5xl font-bold mb-4 text-yellow-500">Welcome to Pressboxd</h1>
+        <p className="text-xl mb-8">Rate and review sports games like never before.</p>
         <div className="flex space-x-4">
           <Link
             href="/login"
@@ -49,12 +46,11 @@ export default function IndexPage() {
   useEffect(() => {
     async function fetchFeaturedGames() {
       try {
-        // Replace the league id below with one that is currently active.
+        // Use TheSportsDB free API key ("1"). Replace the leagueId with an active league if needed.
         const leagueId = '4328'; // Example: English Premier League
         const url = `https://www.thesportsdb.com/api/v1/json/1/eventsnextleague.php?id=${leagueId}`;
         const res = await fetch(url);
         if (res.status === 404) {
-          // 404 may mean no upcoming events.
           setFeaturedGames([]);
           setGamesError(null);
           return;
@@ -67,7 +63,6 @@ export default function IndexPage() {
           return;
         }
         const data = await res.json();
-        // If there are no events, data.events may be null.
         setFeaturedGames(data.events || []);
       } catch (error) {
         console.error('Error fetching featured games:', error);
@@ -109,21 +104,15 @@ export default function IndexPage() {
         )}
       </div>
       <div className="container mx-auto p-4">
-        <h2 className="text-2xl font-bold mb-4 text-yellow-500">
-          What Your Friends Are Reviewing
-        </h2>
+        <h2 className="text-2xl font-bold mb-4 text-yellow-500">What Your Friends Are Reviewing</h2>
         {reviewsLoading ? (
           <p>Loading reviews...</p>
         ) : friendReviews && friendReviews.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {friendReviews.map((review) => (
               <div key={review.id} className="bg-gray-800 p-4 rounded shadow transition transform hover:scale-105">
-                <h3 className="font-bold text-yellow-500">
-                  {review.game_title || 'Game Title'}
-                </h3>
-                <p className="text-sm text-gray-400">
-                  By {review.profiles?.username || 'Unknown'}
-                </p>
+                <h3 className="font-bold text-yellow-500">{review.game_title || 'Game Title'}</h3>
+                <p className="text-sm text-gray-400">By {review.profiles?.username || 'Unknown'}</p>
                 <p className="text-gray-200">{review.review_text}</p>
               </div>
             ))}
