@@ -1,0 +1,181 @@
+{
+  "version": 4,
+  "routes": {
+    "/forum/soccer": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/soccer.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/cricket": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/cricket.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/hockey": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/hockey.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/tennis": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/tennis.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/volleyball": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/volleyball.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/table-tennis": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/table-tennis.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/basketball": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/basketball.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/baseball": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/baseball.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/rugby": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/rugby.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/golf": {
+      "initialRevalidateSeconds": 10,
+      "initialExpireSeconds": 31536000,
+      "srcRoute": "/forum/[category]",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/golf.json",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    }
+  },
+  "dynamicRoutes": {
+    "/forum/[category]": {
+      "routeRegex": "^/forum/([^/]+?)(?:/)?$",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/[category].json",
+      "fallback": null,
+      "dataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/([^/]+?)\\.json$",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    },
+    "/forum/[category]/[postId]": {
+      "routeRegex": "^/forum/([^/]+?)/([^/]+?)(?:/)?$",
+      "dataRoute": "/_next/data/kpPVL-P6JAILzI5mLjywb/forum/[category]/[postId].json",
+      "fallback": null,
+      "dataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/([^/]+?)/([^/]+?)\\.json$",
+      "allowHeader": [
+        "host",
+        "x-matched-path",
+        "x-prerender-revalidate",
+        "x-prerender-revalidate-if-generated",
+        "x-next-revalidated-tags",
+        "x-next-revalidate-tag-token"
+      ]
+    }
+  },
+  "notFoundRoutes": [],
+  "preview": {
+    "previewModeId": "6b8bcdaa517a7c831108a6948b51bb70",
+    "previewModeSigningKey": "564081e67a4d02695ae2f55bf08879cf62d19793ad2b3c3917c168c04fcb4af0",
+    "previewModeEncryptionKey": "91b28cd7d7ef0c353b15e711aa884b4c5e89aa19eba2651473ff5a685d0d20a4"
+  }
+}

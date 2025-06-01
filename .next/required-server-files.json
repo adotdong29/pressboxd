@@ -97,7 +97,6 @@
       }
     },
     "outputFileTracingRoot": "/Users/qdong/Desktop/Desktop1/Andy/pressboxd",
-    "allowedDevOrigins": [],
     "experimental": {
       "allowedDevOrigins": [],
       "nodeMiddleware": false,
@@ -301,6 +300,6 @@
     ".next/server/next-font-manifest.json"
   ],
   "ignore": [
-    "../../../../../../usr/local/lib/node_modules/next/dist/compiled/@ampproject/toolbox-optimizer/**/*"
+    "node_modules/next/dist/compiled/@ampproject/toolbox-optimizer/**/*"
   ]
 }

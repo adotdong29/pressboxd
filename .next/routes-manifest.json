@@ -134,8 +134,8 @@
       "routeKeys": {
         "nxtPcategory": "nxtPcategory"
       },
-      "dataRouteRegex": "^/_next/data/xbq51ZmDrH0SJMiNRfW86/forum/([^/]+?)\\.json$",
-      "namedDataRouteRegex": "^/_next/data/xbq51ZmDrH0SJMiNRfW86/forum/(?<nxtPcategory>[^/]+?)\\.json$"
+      "dataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/(?<nxtPcategory>[^/]+?)\\.json$"
     },
     {
       "page": "/forum/[category]/[postId]",
@@ -143,8 +143,8 @@
         "nxtPcategory": "nxtPcategory",
         "nxtPpostId": "nxtPpostId"
       },
-      "dataRouteRegex": "^/_next/data/xbq51ZmDrH0SJMiNRfW86/forum/([^/]+?)/([^/]+?)\\.json$",
-      "namedDataRouteRegex": "^/_next/data/xbq51ZmDrH0SJMiNRfW86/forum/(?<nxtPcategory>[^/]+?)/(?<nxtPpostId>[^/]+?)\\.json$"
+      "dataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/([^/]+?)/([^/]+?)\\.json$",
+      "namedDataRouteRegex": "^/_next/data/kpPVL\\-P6JAILzI5mLjywb/forum/(?<nxtPcategory>[^/]+?)/(?<nxtPpostId>[^/]+?)\\.json$"
     }
   ],
   "rsc": {
