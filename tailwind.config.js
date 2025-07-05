@@ -1,25 +1,17 @@
-// tailwind.config.js
+// === tailwind.config.js ===
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
-  content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-  ],
+  content: ['./pages/**/*.{js,jsx}', './components/**/*.{js,jsx}'],
   theme: {
     extend: {
-      keyframes: {
-        fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(10px)' },
-          '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-      },
-      animation: {
-        fadeIn: 'fadeIn 0.5s ease-out forwards',
-      },
       colors: {
-        yellow: {
-          500: '#fbbf24',
-        },
+        primary: '#1E40AF',    // Deep Blue
+        secondary: '#F59E0B',  // Amber
+        accent: '#10B981',     // Emerald
+        background: '#F3F4F6', // Gray-100
+        surface: '#FFFFFF',    // White
+        textPrimary: '#111827',// Gray-900
+        textSecondary: '#6B7280'// Gray-500
       },
     },
   },
