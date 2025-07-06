@@ -31,7 +31,9 @@ export default function SportPage() {
         setLoading(false);
         return;
       }
-      const url = `https://www.thesportsdb.com/api/v1/json/1/eventsnextleague.php?id=${mapping.leagueId}`;
+      const apiKey = process.env.NEXT_PUBLIC_SPORTS_API_KEY;
+      
+      const url = `https://www.thesportsdb.com/api/v1/json/${apiKey}/eventsnextleague.php?id=${mapping.leagueId}`;
       try {
         const res = await fetch(url);
         if (res.status === 404) {
@@ -58,6 +60,14 @@ export default function SportPage() {
     }
     fetchGames();
   }, [sport]);
+
+  if (process.env.NODE.ENV === 'development') {
+    console.log('Test fetch URL:', url);
+    console.assert(
+      url.includes(process.env.NEXT_PUBLIC_SPORTS_API_KEY),
+      'API key not found in URL'
+    )
+  }
 
   if (loading)
     return <div className="p-4">Loading games for {sport}...</div>;
