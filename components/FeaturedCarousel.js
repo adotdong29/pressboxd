@@ -1,20 +1,28 @@
-// components/FeaturedCarousel.js
-import GameCard from './GameCard';
+// NEW: components/FeaturedCarousel.js
+import React, { useEffect, useState } from 'react';
+import { getUpcomingGamesByLeague } from '../lib/sportsApi';
 
-export default function FeaturedCarousel({ games = [] }) {
-  if (!games || games.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-400">
-        No featured games available.
-      </div>
-    );
+export default function FeaturedCarousel({ leagueId = 39 /*EPL*/ }) {
+  const [featured, setFeatured] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      const events = await getUpcomingGamesByLeague(leagueId, 5);
+      setFeatured(events);
+    }
+    load();
+  }, [leagueId]);
+
+  if (!featured.length) {
+    return <p className="text-gray-400 italic">No featured games available.</p>;
   }
 
   return (
-    <div className="overflow-x-auto whitespace-nowrap animate-fadeIn">
-      {games.map((game) => (
-        <div key={game.idEvent} className="inline-block mr-4">
-          <GameCard game={game} />
+    <div className="carousel">
+      {featured.map((evt) => (
+        <div key={evt.fixture.id} className="carousel-item">
+          <p className="font-bold">{evt.teams.home.name} vs {evt.teams.away.name}</p>
+          <p className="text-sm">{evt.fixture.date.split('T')[0]}</p>
         </div>
       ))}
     </div>
