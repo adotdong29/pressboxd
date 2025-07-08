@@ -1,97 +1,152 @@
 // pages/sports/[sport].js
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
-
-const sportsMapping = {
-  soccer: { leagueId: '4328', sportName: 'Soccer' },
-  cricket: { leagueId: '4391', sportName: 'Cricket' },
-  hockey: { leagueId: '4334', sportName: 'Hockey' },
-  tennis: { leagueId: '4464', sportName: 'Tennis' },
-  volleyball: { leagueId: '4466', sportName: 'Volleyball' },
-  'table-tennis': { leagueId: '4468', sportName: 'Table Tennis' },
-  basketball: { leagueId: '4387', sportName: 'Basketball' },
-  baseball: { leagueId: '4424', sportName: 'Baseball' },
-  rugby: { leagueId: '4388', sportName: 'Rugby' },
-  golf: { leagueId: '4469', sportName: 'Golf' },
-};
+import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { useAuth } from '../../context/AuthContext'
 
 export default function SportPage() {
-  const router = useRouter();
-  const { sport } = router.query;
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const { sport } = router.query
 
-  useEffect(() => {
-    if (!sport) return;
-    async function fetchGames() {
-      const mapping = sportsMapping[sport];
-      if (!mapping) {
-        setError('Sport not recognized.');
-        setLoading(false);
-        return;
-      }
-      const apiKey = process.env.NEXT_PUBLIC_SPORTS_API_KEY;
-      
-      const url = `https://www.thesportsdb.com/api/v1/json/${apiKey}/eventsnextleague.php?id=${mapping.leagueId}`;
-      try {
-        const res = await fetch(url);
-        if (res.status === 404) {
-          setGames([]);
-          setError(null);
-          setLoading(false);
-          return;
-        }
-        if (!res.ok) {
-          const text = await res.text();
-          setError(`Error fetching games: HTTP ${res.status}`);
-          setGames([]);
-          setLoading(false);
-          return;
-        }
-        const data = await res.json();
-        setGames(data.events || []);
-      } catch (err) {
-        setError('Error fetching games.');
-        setGames([]);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchGames();
-  }, [sport]);
-
-  if (process.env.NODE.ENV === 'development') {
-    console.log('Test fetch URL:', url);
-    console.assert(
-      url.includes(process.env.NEXT_PUBLIC_SPORTS_API_KEY),
-      'API key not found in URL'
-    )
+  // Config for each sport’s API-Sports endpoint
+  const leagueConfigs = {
+    soccer: {
+      name: 'English Premier League',
+      url: `https://v3.football.api-sports.io/fixtures?league=39&season=2023&next=10`,
+      header: 'v3.football',
+    },
+    cricket: {
+      name: 'Major League Cricket',
+      url: `https://cricket.api-sports.io/fixtures?season=2025&next=10`,
+      header: 'cricket',
+    },
+    hockey: {
+      name: 'NHL',
+      url: `https://v1.hockey.api-sports.io/games?season=2023&next=10`,
+      header: 'v1.hockey',
+    },
+    tennis: {
+      name: 'ATP Tour',
+      url: `https://tennis.api-sports.io/fixtures?season=2023&next=10`,
+      header: 'tennis',
+    },
+    volleyball: {
+      name: 'Volleyball',
+      url: null,
+    },
+    'table-tennis': {
+      name: 'Table Tennis',
+      url: null,
+    },
+    basketball: {
+      name: 'NBA',
+      url: `https://v1.basketball.api-sports.io/games?league=12&season=2023&next=10`,
+      header: 'v1.basketball',
+    },
+    baseball: {
+      name: 'MLB',
+      url: `https://v1.baseball.api-sports.io/games?league=1&season=2023&next=10`,
+      header: 'v1.baseball',
+    },
+    rugby: {
+      name: 'Major League Rugby',
+      url: `https://rugby.api-sports.io/fixtures?league=375&season=2023&next=10`,
+      header: 'rugby',
+    },
+    golf: {
+      name: 'PGA Tour',
+      url: null,
+    },
   }
 
-  if (loading)
-    return <div className="p-4">Loading games for {sport}...</div>;
-  if (error) return <div className="p-4 text-red-500">{error}</div>;
+  const [events, setEvents] = useState([])
+  const [errorMsg, setErrorMsg] = useState(null)
 
+  useEffect(() => {
+    if (!sport || !leagueConfigs[sport]) return
+
+    const conf = leagueConfigs[sport]
+    if (!conf.url) {
+      setEvents([])
+      return
+    }
+
+    async function fetchEvents() {
+      try {
+        const res = await fetch(conf.url, {
+          headers: { 'x-apisports-key': process.env.NEXT_PUBLIC_APISPORTS_KEY },
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const json = await res.json()
+        // API-Sports puts payload in response or data
+        const evts = json.response || json.data || []
+        setEvents(evts)
+      } catch (err) {
+        console.error(err)
+        setErrorMsg('Failed to load upcoming events.')
+      }
+    }
+    fetchEvents()
+  }, [sport])
+
+  if (loading) return <div className="p-4">Loading...</div>
+  if (!user) {
+    router.push('/login')
+    return null
+  }
+
+  const conf = leagueConfigs[sport]
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 animate-fadeIn">
-      <div className="container mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-yellow-500">
-          {sportsMapping[sport].sportName} Games
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <div className="container mx-auto p-4">
+        <h1 className="text-3xl font-bold mb-4 text-yellow-500 capitalize">
+          {conf?.name || sport}
         </h1>
-        {games.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {games.map((game) => (
-              <div key={game.idEvent} className="bg-gray-800 p-4 rounded shadow transition transform hover:scale-105">
-                <h2 className="text-xl font-bold text-yellow-500">{game.strEvent}</h2>
-                <p>{game.dateEvent} at {game.strTime}</p>
-              </div>
-            ))}
-          </div>
+
+        {errorMsg && <p className="text-red-500">{errorMsg}</p>}
+
+        {conf?.url ? (
+          events.length > 0 ? (
+            events.map((evt, i) => {
+              // normalize home/away
+              const home =
+                evt.teams?.home?.name ||
+                evt.home_team ||
+                evt.teamsHome?.team_name ||
+                ''
+              const away =
+                evt.teams?.away?.name ||
+                evt.away_team ||
+                evt.teamsAway?.team_name ||
+                ''
+              const date =
+                evt.fixture?.date?.split('T')[0] || evt.event_date || ''
+              return (
+                <div
+                  key={i}
+                  className="mb-4 p-4 bg-gray-800 rounded shadow transition hover:scale-105"
+                >
+                  <p className="text-xl font-semibold text-gray-100">
+                    {home} vs {away}
+                  </p>
+                  <p className="text-gray-400">{date}</p>
+                </div>
+              )
+            })
+          ) : (
+            <p className="text-gray-400">No upcoming events</p>
+          )
         ) : (
-          <p>No upcoming games available for {sport}.</p>
+          <p className="text-gray-400">
+            Upcoming events for this sport are not available.
+          </p>
         )}
+
+        <Link href="/" className="inline-block mt-6 text-yellow-500 underline">
+          ← Back to Dashboard
+        </Link>
       </div>
     </div>
-  );
+  )
 }

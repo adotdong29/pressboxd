@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabaseClient';
 
 export default function IndexPage() {
   const { user, loading } = useAuth();
+
   if (loading) return <div className="p-4">Loading...</div>;
 
   if (!user) {
@@ -19,48 +20,83 @@ export default function IndexPage() {
           Rate and review sports games like never before.
         </p>
         <div className="flex space-x-4">
-          <Link href="/login" className="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-400 transition hover:scale-105">Login</Link>
-          <Link href="/signup" className="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-400 transition hover:scale-105">Sign Up</Link>
+          <Link
+            href="/login"
+            className="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-400 transition hover:scale-105"
+          >
+            Login
+          </Link>
+          <Link
+            href="/signup"
+            className="bg-yellow-500 text-gray-900 py-2 px-4 rounded hover:bg-yellow-400 transition hover:scale-105"
+          >
+            Sign Up
+          </Link>
         </div>
       </div>
     );
   }
 
-  // Map sports → their league IDs for TheSportsDB
-  const leagueIds = {
-    soccer: '4328',        // English Premier League
-    cricket: '5401',       // Major League Cricket
-    hockey: '4380',        // NHL
-    tennis: '4464',        // ATP World Tour
-    volleyball: null,     
-    'table-tennis': null, 
-    basketball: '4387',    // NBA
-    baseball: '4424',      // MLB
-    rugby: '5070',         // Major League Rugby
-    golf: '4425',          // PGA Tour
+  // API-Sports league IDs / endpoints
+  const apiKey = process.env.NEXT_PUBLIC_APISPORTS_KEY;
+  const configs = {
+    soccer: {
+      url: `https://v3.football.api-sports.io/fixtures?league=39&season=2023&next=5`,
+      header: 'v3.football',
+    },
+    cricket: {
+      url: `https://cricket.api-sports.io/fixtures?season=2025&next=5`,
+      header: 'cricket',
+    },
+    hockey: {
+      url: `https://v1.hockey.api-sports.io/games?season=2023&next=5`,
+      header: 'v1.hockey',
+    },
+    tennis: {
+      url: `https://tennis.api-sports.io/fixtures?season=2023&next=5`,
+      header: 'tennis',
+    },
+    volleyball: { url: null },
+    'table-tennis': { url: null },
+    basketball: {
+      url: `https://v1.basketball.api-sports.io/games?league=12&season=2023&next=5`,
+      header: 'v1.basketball',
+    },
+    baseball: {
+      url: `https://v1.baseball.api-sports.io/games?league=1&season=2023&next=5`,
+      header: 'v1.baseball',
+    },
+    rugby: {
+      url: `https://rugby.api-sports.io/fixtures?league=375&season=2023&next=5`,
+      header: 'rugby',
+    },
+    golf: { url: null },
   };
-  const sportsList = Object.keys(leagueIds);
+  const sportsList = Object.keys(configs);
 
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [friendReviews, setFriendReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-  // Fetch upcoming events for each league
+  // Fetch upcoming fixtures per sport via API-Sports.com
   useEffect(() => {
     async function fetchAll() {
-      const apiKey = process.env.NEXT_PUBLIC_SPORTS_API_KEY;
       const results = await Promise.all(
         sportsList.map(async (sport) => {
-          const id = leagueIds[sport];
-          if (!id) return { sport, events: [] };
+          const conf = configs[sport];
+          if (!conf.url) return { sport, events: [] };
+
           try {
-            const res = await fetch(
-              `https://www.thesportsdb.com/api/v1/json/${apiKey}/eventsnextleague.php?id=${id}`
-            );
+            const res = await fetch(conf.url, {
+              headers: { 'x-apisports-key': apiKey },
+            });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            return { sport, events: data.events || [] };
-          } catch {
+            const json = await res.json();
+            // response field differs by sport API version:
+            const events = json.response || json.data || [];
+            return { sport, events };
+          } catch (err) {
+            console.error(`Error fetching ${sport}:`, err);
             return { sport, events: [] };
           }
         })
@@ -70,12 +106,12 @@ export default function IndexPage() {
     fetchAll();
   }, []);
 
-  // Fetch friends' reviews
+  // Fetch friends’ latest reviews
   useEffect(() => {
     async function fetchReviews() {
       const { data, error } = await supabase
         .from('reviews')
-        .select('*, profiles ( username )')
+        .select('*, profiles(username)')
         .order('created_at', { ascending: false })
         .limit(10);
 
@@ -100,14 +136,20 @@ export default function IndexPage() {
             >
               <p className="text-yellow-500 font-bold capitalize">{sport}</p>
               {events.length > 0 ? (
-                events.map((evt) => (
-                  <div key={evt.idEvent} className="mt-2">
-                    <p className="text-gray-100 font-semibold">{evt.strEvent}</p>
-                    <p className="text-gray-400 text-sm">
-                      {evt.dateEvent} {evt.strTime || ''}
-                    </p>
-                  </div>
-                ))
+                events.map((evt, i) => {
+                  // For tennis/cricket may have different field names
+                  const home = evt.teams ? evt.teams.home.name : evt.teamsHome?.team_name || evt.home_team || '';
+                  const away = evt.teams ? evt.teams.away.name : evt.teamsAway?.team_name || evt.away_team || '';
+                  const date = evt.fixture?.date?.split('T')[0] || evt.event_date || '';
+                  return (
+                    <div key={i} className="mt-2">
+                      <p className="text-gray-100 font-semibold">
+                        {home} vs {away}
+                      </p>
+                      <p className="text-gray-400 text-sm">{date}</p>
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-gray-400 mt-2">No upcoming events</p>
               )}

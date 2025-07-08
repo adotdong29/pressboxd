@@ -53,18 +53,20 @@ export default function TopBar() {
           Friends
         </Link>
 
-        {/* ── Sports dropdown (CSS-only) ────────────────────────────── */}
+        {/* ── Sports dropdown ────────────────────────────── */}
         <div className="relative inline-block group">
-          <button className="text-gray-100 hover:text-yellow-500 focus:outline-none transition hover:scale-105">
+          <button
+            className="text-gray-100 hover:text-yellow-500 focus:outline-none transition hover:scale-105"
+          >
             Sports
           </button>
-
-          <div
-            className={
-              "absolute left-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded z-50 " +
-              "hidden group-hover:block group-focus-within:block hover:block"
-            }
-          >
+          <div className="
+              absolute left-0 top-full mt-1 w-40 bg-gray-800 border border-gray-700 rounded z-50
+              hidden
+              group-hover:block
+              group-focus-within:block
+              hover:block
+            ">
             {sportsList.map((sport) => (
               <Link key={sport} href={`/sports/${sport}`}>
                 <span className="block px-4 py-2 hover:bg-gray-700 cursor-pointer capitalize transition hover:scale-105">
@@ -83,7 +85,7 @@ export default function TopBar() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search users or games"
-            className="px-2 py-1 rounded bg-gray-700 text-gray-100 focus:outline-none transition duration-300"
+            className="px-2 py-1 rounded bg-gray-700 text-gray-100 focus:outline-none transition"
           />
           <button
             type="submit"
@@ -92,7 +94,6 @@ export default function TopBar() {
             Search
           </button>
         </form>
-
         {user ? (
           <button
             onClick={handleLogout}
